@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Parking Lot System</title>
+
+    <style>
+
+        body{
+            font-family: Arial, Helvetica, sans-serif;
+            background:#f5f6fa;
+            margin:0;
+        }
+
+        header{
+            background:#2f3640;
+            color:white;
+            padding:15px;
+            text-align:center;
+        }
+
+        .container{
+            display:flex;
+            justify-content:center;
+            gap:40px;
+            margin-top:40px;
+        }
+
+        .card{
+            background:white;
+            padding:25px;
+            border-radius:10px;
+            width:320px;
+            box-shadow:0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .card h2{
+            text-align:center;
+        }
+
+        input,select{
+            width:100%;
+            padding:10px;
+            margin-top:10px;
+            border-radius:5px;
+            border:1px solid #ccc;
+        }
+
+        button{
+            width:100%;
+            margin-top:15px;
+            padding:10px;
+            border:none;
+            border-radius:5px;
+            background:#0984e3;
+            color:white;
+            font-weight:bold;
+            cursor:pointer;
+        }
+
+        button:hover{
+            background:#0652DD;
+        }
+
+        .result{
+            margin-top:15px;
+            background:#f1f2f6;
+            padding:10px;
+            border-radius:5px;
+            font-size:14px;
+        }
+
+        .success{
+            color:green;
+        }
+
+        .error{
+            color:red;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🚗 Parking Lot Management System</h1>
+</header>
+
+<div class="container">
+
+    <!-- ENTRY CARD -->
+    <div class="card">
+
+        <h2>Vehicle Entry</h2>
+
+        <input id="vehicleNumber" placeholder="Vehicle Number">
+
+        <select id="vehicleType">
+            <option value="TWOWHEELER">Two Wheeler</option>
+            <option value="FOURWHEELER">Four Wheeler</option>
+        </select>
+
+        <button onclick="enterParking()">Generate Ticket</button>
+
+        <div id="entryResult" class="result"></div>
+
+    </div>
+
+    <!-- EXIT CARD -->
+    <div class="card">
+
+        <h2>Vehicle Exit</h2>
+
+        <input id="ticketId" placeholder="Ticket ID">
+
+        <button onclick="exitParking()">Generate Bill</button>
+
+        <div id="exitResult" class="result"></div>
+
+    </div>
+
+</div>
+
+<script>
+
+    async function enterParking(){
+
+        const vehicleNumber = document.getElementById("vehicleNumber").value
+        const vehicleType = document.getElementById("vehicleType").value
+
+        try{
+
+            const response = await fetch(`/parking/entry?vehicleNumber=${vehicleNumber}&vehicleType=${vehicleType}`,{
+                method:"POST"
+            })
+
+            const data = await response.json()
+
+            document.getElementById("entryResult").innerHTML = `
+                <p class="success">Ticket Generated</p>
+                <p><b>Ticket ID:</b> ${data.id}</p>
+                <p><b>Vehicle:</b> ${data.vehicleNumber}</p>
+                <p><b>Spot:</b> ${data.parkingSpotId}</p>
+                <p><b>Entry Time:</b> ${data.entryTime}</p>
+            `
+
+        }catch(e){
+
+            document.getElementById("entryResult").innerHTML =
+            `<p class="error">Parking failed</p>`
+
+        }
+    }
+
+    async function exitParking(){
+
+        const ticketId = document.getElementById("ticketId").value
+
+        try{
+
+            const response = await fetch(`/parking/exit?ticketId=${ticketId}`,{
+                method:"POST"
+            })
+
+            const data = await response.json()
+
+            document.getElementById("exitResult").innerHTML = `
+                <p class="success">Bill Generated</p>
+                <p><b>Ticket ID:</b> ${data.ticketId}</p>
+                <p><b>Exit Time:</b> ${data.exitTime}</p>
+                <p><b>Amount:</b> ₹${data.amount}</p>
+            `
+
+        }catch(e){
+
+            document.getElementById("exitResult").innerHTML =
+            `<p class="error">Invalid Ticket</p>`
+
+        }
+    }
+
+</script>
+
+</body>
+</html>
